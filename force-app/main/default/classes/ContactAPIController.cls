@@ -19,4 +19,58 @@ public with sharing class ContactAPIController {
         }
         return response;
 }
+
+    public static HttpResponse createContactInAXG(String firstName, String lastName, String email) {
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(AXG_ENDPOINT);
+        request.setMethod('POST');
+        request.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        // Création du corps de la requête avec les détails du contact
+        Map<String, String> contactDetails = new Map<String, String>{
+            'firstName' => firstName,
+            'lastName' => lastName,
+            'email' => email
+        };
+        request.setBody(JSON.serialize(contactDetails));
+
+        HttpResponse response = http.send(request);
+
+        if(response.getStatusCode() != 201) {
+            System.debug('The status code returned was not expected: ' + response.getStatusCode() + ' ' + response.getStatus());
+        } else {
+            System.debug(response.getBody());
+        }
+
+        return response;
+    }
+
+    public static HttpResponse updateContactInAXG(String contactId, String firstName, String lastName, String email) {
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(AXG_ENDPOINT + '/' + contactId);  // Supposons que l'endpoint pour mettre à jour un contact soit basé sur l'ID du contact
+        request.setMethod('PUT');  // PUT est couramment utilisé pour les mises à jour
+        request.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        // Création du corps de la requête avec les détails du contact mis à jour
+        Map<String, String> contactDetails = new Map<String, String>{
+            'firstName' => firstName,
+            'lastName' => lastName,
+            'email' => email
+        };
+        request.setBody(JSON.serialize(contactDetails));
+    
+        HttpResponse response = http.send(request);
+    
+        if(response.getStatusCode() != 200) {  // 200 OK est souvent utilisé pour indiquer que la mise à jour a été réussie
+            System.debug('The status code returned was not expected: ' + response.getStatusCode() + ' ' + response.getStatus());
+        } else {
+            System.debug(response.getBody());
+        }
+    
+        return response;
+    }
+
+
 }
