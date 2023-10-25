@@ -21,7 +21,7 @@ global with sharing class ContactAPIController {
 }
 
     @HttpPost
-    public static HttpResponse createContactInAXG(String firstName, String lastName, String email) {
+    public static String createContactInAXG(String firstName, String lastName, String email) {
         //Recherche du contact existant par l'email avant creation 
 
         List<Contact> existingContacts = [SELECT Id FROM Contact WHERE Email = :email LIMIT 1];
@@ -45,7 +45,16 @@ global with sharing class ContactAPIController {
         return newContact.Id;
     }
 
-       
+     @HttpPut
+     public static String updateContact(String contactId, String firstname, String lastname, String Email){
+        Contact existingContact = [SELECT Id FROM Contact WHERE Id = :contactId];
+        existingContact.FirstName = firstname;
+        existingContact.LastName = lastname;
+        existingContact.Email = email;
+        update existingContact;
+        return existingContact.Id;
+
+     }  
 
     public static HttpResponse updateContactInAXG(String contactId, String firstName, String lastName, String email) {
         Http http = new Http();
