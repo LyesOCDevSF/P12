@@ -1,21 +1,26 @@
 @RestResource(urlMapping='/Contract/*')
 global with sharing class ContractAPIController {
 
-    static final String AXG_ENDPOINT = 'https://crm-axg-endpoint.com/api/contracts';
+    @HttpPost
+    global static String createContract() {
+        RestRequest req = RestContext.request;
+        RestResponse res = RestContext.response;
 
-    // Recherche d'un contrat par son numéro
-    public static HttpResponse getContractFromAXG(String contractNumber) {
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint(AXG_ENDPOINT + '/' + contractNumber);
-        request.setMethod('GET');
-        HttpResponse response = http.send(request);
+        Map<String, Object> requestBody = (Map<String, Object>) JSON.deserializeUntyped(req.requestBody.toString());
 
-        if(response.getStatusCode() == 200) {
-            Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
-            System.debug('Received contract: ' + results);
-        }
-        return response;
+        String accountID = (String) requestBody.get('AccountId');
+        String startDate = (String) requestBody.get('StartDate');
+        String contractTerm = (String) requestBody.get('ContractTerm');
+
+        Contract newContract = new Contract(
+            AccountId = accountID,
+            StartDate = Date.valueOf(startDate),
+            ContractTerm = Integer.valueOf(contractTerm)
+        );
+
+        insert newContract;
+
+        return newContract.Id;
     }
 
     // Création d'un contrat
