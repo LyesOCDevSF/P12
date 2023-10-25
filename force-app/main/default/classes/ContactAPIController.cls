@@ -45,16 +45,44 @@ global with sharing class ContactAPIController {
         return newContact.Id;
     }
 
-     @HttpPut
-     public static String updateContact(String contactId, String firstname, String lastname, String Email){
-        Contact existingContact = [SELECT Id FROM Contact WHERE Id = :contactId];
-        existingContact.FirstName = firstname;
-        existingContact.LastName = lastname;
-        existingContact.Email = email;
-        update existingContact;
-        return existingContact.Id;
+    @HttpPut
+global static String updateContact() {
+    RestRequest req = RestContext.request;
+    RestResponse res = RestContext.response;
 
-     }  
+    Map<String, Object> requestBody = (Map<String, Object>) JSON.deserializeUntyped(req.requestBody.toString());
+
+    String contactId = (String) requestBody.get('contactId');
+    String firstName = (String) requestBody.get('firstName');
+    String lastName = (String) requestBody.get('lastName');
+    String email = (String) requestBody.get('email');
+
+    Contact existingContact = [SELECT Id, FirstName, LastName, Email FROM Contact WHERE Id = :contactId];
+    
+    Boolean isModified = false;
+    
+    if (firstName != null && existingContact.FirstName != firstName) {
+        existingContact.FirstName = firstName;
+        isModified = true;
+    }
+    
+    if (lastName != null && existingContact.LastName != lastName) {
+        existingContact.LastName = lastName;
+        isModified = true;
+    }
+    
+    if (email != null && existingContact.Email != email) {
+        existingContact.Email = email;
+        isModified = true;
+    }
+    
+    if (isModified) {
+        update existingContact;
+    }
+    
+    return existingContact.Id;
+}
+
 
 
 
