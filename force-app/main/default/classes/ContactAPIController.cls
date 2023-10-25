@@ -20,7 +20,18 @@ global with sharing class ContactAPIController {
         return response;
 }
 
+    @HttpPost
     public static HttpResponse createContactInAXG(String firstName, String lastName, String email) {
+        //Recherche du contact existant par l'email avant creation 
+
+        List<Contact> existingContacts = [SELECT Id FROM Contact WHERE Email = :email LIMIT 1];
+
+        // Si le contact existant est trouvé son ID est retourné 
+        if(!existingContacts.isEmpty()){
+
+            return existingContacts[0].Id;
+        }
+        
         Http http = new Http();
         HttpRequest request = new HttpRequest();
         request.setEndpoint(AXG_ENDPOINT);
