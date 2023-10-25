@@ -80,6 +80,16 @@ global with sharing class ContactAPIController {
     return existingContact.Id;
 }
 
+@HttpDelete
+global static String deactivateContact() {
+    RestRequest req = RestContext.request;
+    String contactId = req.requestURI.substring(req.requestURI.lastIndexOf('/') + 1);
+    Contact existingContact = [SELECT Id, IsActive__c FROM Contact WHERE Id = :contactId];
+    existingContact.IsActive__c = false;
+    update existingContact;
+    return existingContact.Id;
+}
+
 
 
 
