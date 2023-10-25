@@ -6,7 +6,7 @@ global with sharing class ContactAPIController {
 
     // Recherche d'un contact par son email
     
-    public static HttpResponse getContactFromAXG(String email) {
+   /* public static HttpResponse getContactFromAXG(String email) {
         Http http = new Http();
         HttpRequest request = new HttpRequest();
         request.setEndpoint(AXG_ENDPOINT + '/' + email);
@@ -18,10 +18,10 @@ global with sharing class ContactAPIController {
             System.debug('Received contact: ' + results);
         }
         return response;
-}
+}*/
 
     @HttpPost
-    public static String createContactInAXG(String firstName, String lastName, String email) {
+    global static String createContactInAXG(String firstName, String lastName, String email) {
         //Recherche du contact existant par l'email avant creation 
 
         List<Contact> existingContacts = [SELECT Id FROM Contact WHERE Email = :email LIMIT 1];
@@ -46,7 +46,7 @@ global with sharing class ContactAPIController {
     }
 
     @HttpPut
-global static String updateContact() {
+    global static String updateContact() {
     RestRequest req = RestContext.request;
     RestResponse res = RestContext.response;
 
