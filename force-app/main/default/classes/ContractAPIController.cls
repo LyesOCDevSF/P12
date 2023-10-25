@@ -30,7 +30,7 @@ global with sharing class ContractAPIController {
 
         Map<String, Object> requestBody = (Map<String, Object>) JSON.deserializeUntyped(req.requestBody.toString());
 
-        String contractId = (String) requestBody.get('ContractId');
+        String contractId = (String) requestBody.get('ContractId');  // L'Id de Salesforce est utilisé pour identifier le contrat.
         String startDate = (String) requestBody.get('StartDate');
         String contractTerm = (String) requestBody.get('ContractTerm');
 
