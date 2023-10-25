@@ -23,57 +23,35 @@ global with sharing class ContractAPIController {
         return newContract.Id;
     }
 
-    // Création d'un contrat
-    public static HttpResponse createContractInAXG(String contractName, Date startDate, Date endDate) {
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint(AXG_ENDPOINT);
-        request.setMethod('POST');
-        request.setHeader('Content-Type', 'application/json;charset=UTF-8');
+    @HttpPut
+    global static String updateContract() {
+        RestRequest req = RestContext.request;
+        RestResponse res = RestContext.response;
 
-        // Création du corps de la requête avec les détails du contrat
-        Map<String, Object> contractDetails = new Map<String, Object>{
-            'contractName' => contractName,
-            'startDate' => startDate,
-            'endDate' => endDate
-        };
-        request.setBody(JSON.serialize(contractDetails));
+        Map<String, Object> requestBody = (Map<String, Object>) JSON.deserializeUntyped(req.requestBody.toString());
 
-        HttpResponse response = http.send(request);
+        String contractId = (String) requestBody.get('ContractId');
+        String startDate = (String) requestBody.get('StartDate');
+        String contractTerm = (String) requestBody.get('ContractTerm');
 
-        if(response.getStatusCode() != 201) {
-            System.debug('The status code returned was not expected: ' + response.getStatusCode() + ' ' + response.getStatus());
-        } else {
-            System.debug(response.getBody());
+        Contract existingContract = [SELECT Id, StartDate, ContractTerm FROM Contract WHERE Id = :contractId];
+        
+        Boolean isModified = false;
+        
+        if (startDate != null && existingContract.StartDate != Date.valueOf(startDate)) {
+            existingContract.StartDate = Date.valueOf(startDate);
+            isModified = true;
         }
-
-        return response;
-    }
-
-    // Modification d'un contrat
-    public static HttpResponse updateContractInAXG(String contractId, String contractName, Date startDate, Date endDate) {
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint(AXG_ENDPOINT + '/' + contractId);  
-        request.setMethod('PUT');  
-        request.setHeader('Content-Type', 'application/json;charset=UTF-8');
-
-        // Création du corps de la requête avec les détails du contrat mis à jour
-        Map<String, Object> contractDetails = new Map<String, Object>{
-            'contractName' => contractName,
-            'startDate' => startDate,
-            'endDate' => endDate
-        };
-        request.setBody(JSON.serialize(contractDetails));
-
-        HttpResponse response = http.send(request);
-
-        if(response.getStatusCode() != 200) {
-            System.debug('The status code returned was not expected: ' + response.getStatusCode() + ' ' + response.getStatus());
-        } else {
-            System.debug(response.getBody());
+        
+        if (contractTerm != null && existingContract.ContractTerm != Integer.valueOf(contractTerm)) {
+            existingContract.ContractTerm = Integer.valueOf(contractTerm);
+            isModified = true;
         }
-
-        return response;
+        
+        if (isModified) {
+            update existingContract;
+        }
+        
+        return existingContract.Id;
     }
 }
