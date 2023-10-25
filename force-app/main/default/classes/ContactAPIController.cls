@@ -12,6 +12,12 @@ global with sharing class ContactAPIController {
         String lastName = (String) requestBody.get('lastName');
         String email = (String) requestBody.get('email');
 
+        // Vérifie si un contact avec cette adresse e-mail existe déjà
+        List<Contact> existingContacts = [SELECT Id FROM Contact WHERE Email = :email];
+        if (existingContacts.size() > 0) {
+            return existingContacts[0].Id;
+        }
+
         Contact newContact = new Contact(
             FirstName = firstName,
             LastName = lastName,
