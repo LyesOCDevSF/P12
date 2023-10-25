@@ -1,8 +1,8 @@
-@RestResource(urlMapping='/contactAPI/*')
-public with sharing class ContactAPIController {
+@RestResource(urlMapping='/Contact/*')
+global with sharing class ContactAPIController {
    
 
-    static final String AXG_ENDPOINT = 'https://crm-axg-endpoint.com/api/contacts';
+    //static final String AXG_ENDPOINT = 'https://crm-axg-endpoint.com/api/contacts';
 
     // Recherche d'un contact par son email
     
@@ -50,7 +50,7 @@ public with sharing class ContactAPIController {
         Http http = new Http();
         HttpRequest request = new HttpRequest();
         request.setEndpoint(AXG_ENDPOINT + '/' + contactId);  // Supposons que l'endpoint pour mettre à jour un contact soit basé sur l'ID du contact
-        request.setMethod('PUT');  // PUT est couramment utilisé pour les mises à jour
+        request.setMethod('PUT');  
         request.setHeader('Content-Type', 'application/json;charset=UTF-8');
         
         // Création du corps de la requête avec les détails du contact mis à jour
