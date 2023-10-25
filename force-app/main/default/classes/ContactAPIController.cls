@@ -21,27 +21,24 @@ global with sharing class ContactAPIController {
 }*/
 
     @HttpPost
-    global static String createContactInAXG(String firstName, String lastName, String email) {
-        //Recherche du contact existant par l'email avant creation 
+    global static String createContact() {
+        RestRequest req = RestContext.request;
+        RestResponse res = RestContext.response;
 
-        List<Contact> existingContacts = [SELECT Id FROM Contact WHERE Email = :email LIMIT 1];
+        Map<String, Object> requestBody = (Map<String, Object>) JSON.deserializeUntyped(req.requestBody.toString());
 
-        // Si le contact existant est trouvé son ID est retourné 
-        if(!existingContacts.isEmpty()){
-
-            return existingContacts[0].Id;
-        }
-
-        // Si aucun contact existant n'est trouvé => création du nouveau contact
+        String firstName = (String) requestBody.get('firstName');
+        String lastName = (String) requestBody.get('lastName');
+        String email = (String) requestBody.get('email');
 
         Contact newContact = new Contact(
-            FirstName = firstname,
-            LastName = lastname,
+            FirstName = firstName,
+            LastName = lastName,
             Email = email
         );
+
         insert newContact;
 
-        // Retourne l'Id du nouveau contact
         return newContact.Id;
     }
 
