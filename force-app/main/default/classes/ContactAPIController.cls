@@ -31,31 +31,21 @@ global with sharing class ContactAPIController {
 
             return existingContacts[0].Id;
         }
-        
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint(AXG_ENDPOINT);
-        request.setMethod('POST');
-        request.setHeader('Content-Type', 'application/json;charset=UTF-8');
-        
-        // Création du corps de la requête avec les détails du contact
-        Map<String, String> contactDetails = new Map<String, String>{
-            'firstName' => firstName,
-            'lastName' => lastName,
-            'email' => email
-        };
-        request.setBody(JSON.serialize(contactDetails));
 
-        HttpResponse response = http.send(request);
+        // Si aucun contact existant n'est trouvé => création du nouveau contact
 
-        if(response.getStatusCode() != 201) {
-            System.debug('The status code returned was not expected: ' + response.getStatusCode() + ' ' + response.getStatus());
-        } else {
-            System.debug(response.getBody());
-        }
+        Contact newContact = new Contact(
+            FirstName = firstname,
+            LastName = lastname,
+            Email = email
+        );
+        insert newContact;
 
-        return response;
+        // Retourne l'Id du nouveau contact
+        return newContact.Id;
     }
+
+       
 
     public static HttpResponse updateContactInAXG(String contactId, String firstName, String lastName, String email) {
         Http http = new Http();
