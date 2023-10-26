@@ -5,23 +5,51 @@ global with sharing class ContractAPIController {
     global static String createContract() {
         RestRequest req = RestContext.request;
         RestResponse res = RestContext.response;
-
+    
         Map<String, Object> requestBody = (Map<String, Object>) JSON.deserializeUntyped(req.requestBody.toString());
-
-        String accountID = (String) requestBody.get('AccountId');
-        String startDate = (String) requestBody.get('StartDate');
-        String contractTerm = (String) requestBody.get('ContractTerm');
-
+    
+        // 2léments du contrat 
+        Id contactId = (Id) requestBody.get('ContactId');
+        Date startDate = Date.valueOf((String) requestBody.get('StartDate'));
+        Integer contractTerm = Integer.valueOf((String) requestBody.get('ContractTerm'));
+        String status = (String) requestBody.get('Status');
+    
+        // Recherche du contact si pas de contact correspondant pas de contrat créé retournera null
+        List<Contact> conts = [SELECT Id, Name, AccountId FROM Contact WHERE Id = :contactId];
+        if (conts.size() == 0) {
+            return null;
+        }
+        Contact cont = conts[0];
+        Id accountId = cont.AccountId;
+    
+        // Si le contact a déjà un compte associé
+        if (accountId != null) {
+            Contract newContract = new Contract(
+                AccountId = accountId,
+                StartDate = startDate,
+                ContractTerm = contractTerm,
+                Status = status
+            );
+            insert newContract;
+            return newContract.Id;
+        }
+    
+        // Si le contact n'a pas de compte associé, création d'un nouveau compte
+        Account newAccount = new Account(Name = 'act' + cont.Name);
+        insert newAccount;
+        cont.AccountId = newAccount.Id;
+        update cont;
+    
         Contract newContract = new Contract(
-            AccountId = accountID,
-            StartDate = Date.valueOf(startDate),
-            ContractTerm = Integer.valueOf(contractTerm)
+            AccountId = newAccount.Id,
+            StartDate = startDate,
+            ContractTerm = contractTerm,
+            Status = status
         );
-
         insert newContract;
-
         return newContract.Id;
     }
+    
 
     @HttpPut
     global static String updateContract() {
@@ -55,7 +83,7 @@ global with sharing class ContractAPIController {
         return existingContract.Id;
     }
 
-    @HttpDelete
+   /* @HttpDelete
     global static String deactivateContract() {
         RestRequest req = RestContext.request;
         String contractId = req.requestURI.substring(req.requestURI.lastIndexOf('/') + 1);
@@ -63,5 +91,5 @@ global with sharing class ContractAPIController {
         existingContract.Status = 'Expired';
         update existingContract;
         return existingContract.Id;
-    }
+    }*/
 }
