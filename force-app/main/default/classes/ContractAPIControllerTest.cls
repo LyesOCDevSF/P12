@@ -14,7 +14,7 @@ global class ContractAPIControllerTest {
         
         req.requestBody = Blob.valueOf(JSON.serialize(new Map<String, String> {
             'AccountId' => testAccount.Id,
-            'StartDate' => '2023-01-01',
+            'StartDate' => '2023-11-01',
             'ContractTerm' => '12'
         }));
         
@@ -28,7 +28,7 @@ global class ContractAPIControllerTest {
         Contract createdContract = [SELECT Id, AccountId, StartDate, ContractTerm FROM Contract WHERE Id = :contractId];
         Test.stopTest();
         System.assertEquals(testAccount.Id, createdContract.AccountId);
-        System.assertEquals(Date.parse('2023-01-01'), createdContract.StartDate);
+        System.assertEquals(Date.parse('2023-11-01'), createdContract.StartDate);
         System.assertEquals(12, createdContract.ContractTerm);
         
         
@@ -54,7 +54,7 @@ global class ContractAPIControllerTest {
         
         req.requestBody = Blob.valueOf(JSON.serialize(new Map<String, String> {
             'ContractId' => testContract.Id,
-            'StartDate' => '2023-02-01',
+            'StartDate' => '2023-11-01',
             'ContractTerm' => '24'
         }));
         
@@ -67,7 +67,7 @@ global class ContractAPIControllerTest {
         String contractId = ContractAPIController.updateContract();
         Contract updatedContract = [SELECT Id, StartDate, ContractTerm FROM Contract WHERE Id = :contractId];
         Test.stopTest();
-        System.assertEquals(Date.parse('2023-02-01'), updatedContract.StartDate);
+        System.assertEquals(Date.parse('2023-11-01'), updatedContract.StartDate);
         System.assertEquals(24, updatedContract.ContractTerm);
         
         
