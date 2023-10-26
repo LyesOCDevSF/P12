@@ -21,7 +21,8 @@ global with sharing class ContactAPIController {
         Contact newContact = new Contact(
             FirstName = firstName,
             LastName = lastName,
-            Email = email
+            Email = email,
+            IsActive__c = true
         );
 
         insert newContact;
