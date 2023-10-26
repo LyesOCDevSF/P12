@@ -83,13 +83,5 @@ global with sharing class ContractAPIController {
         return existingContract.Id;
     }
 
-   /* @HttpDelete
-    global static String deactivateContract() {
-        RestRequest req = RestContext.request;
-        String contractId = req.requestURI.substring(req.requestURI.lastIndexOf('/') + 1);
-        Contract existingContract = [SELECT Id, Status FROM Contract WHERE Id = :contractId];
-        existingContract.Status = 'Expired';
-        update existingContract;
-        return existingContract.Id;
-    }*/
+   
 }
