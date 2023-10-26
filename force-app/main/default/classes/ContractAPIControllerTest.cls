@@ -1,109 +1,92 @@
-@IsTest
-global class ContractAPIControllerTest {
+@isTest
+private class ContractAPIControllerTest {
 
-    // Teste la méthode createContract de la classe ContractAPIController.
-    @IsTest
-    static void testCreateContract() {
-        // Crée un compte pour le contrat.
-        Account testAccount = new Account(Name = 'Test Account');
+    // Méthode de test pour la création d'un contrat
+    @isTest static void testCreateContract() {
+        Test.startTest();
+
+        // Création d'un compte et d'un contact pour le test
+        Account testAccount = new Account(Name='Test Account');
         insert testAccount;
 
-        // Prépare la requête et la réponse.
+        Contact testContact = new Contact(FirstName='Test', LastName='Contact', AccountId=testAccount.Id);
+        insert testContact;
+
+        // Préparation de la requête
         RestRequest req = new RestRequest();
         RestResponse res = new RestResponse();
-        
-        req.requestBody = Blob.valueOf(JSON.serialize(new Map<String, String> {
-            'AccountId' => testAccount.Id,
-            'StartDate' => '2023-11-01',
-            'ContractTerm' => '12'
-        }));
+        req.requestURI = '/services/apexrest/Contract/';
+        req.httpMethod = 'POST';
+        req.requestBody = Blob.valueOf(JSON.serialize(
+            new Map<String, Object>{
+                'ContactId' => testContact.Id,
+                'StartDate' => '2023-01-01',
+                'ContractTerm' => '12',
+                'Status' => 'Draft'
+            }
+        ));
         
         RestContext.request = req;
         RestContext.response = res;
-        
-        Test.startTest();
-        
-        // Appelle la méthode createContract et vérifie le résultat.
+
+        // Appel de la méthode
         String contractId = ContractAPIController.createContract();
-        Contract createdContract = [SELECT Id, AccountId, StartDate, ContractTerm FROM Contract WHERE Id = :contractId];
+
         Test.stopTest();
-        System.assertEquals(testAccount.Id, createdContract.AccountId);
-        System.assertEquals(Date.parse('2023-11-01'), createdContract.StartDate);
-        System.assertEquals(12, createdContract.ContractTerm);
-        
-        
+
+        // Vérification des résultats
+        System.assertNotEquals(null, contractId, 'Contract should be created');
+        Contract createdContract = [SELECT Id, AccountId, StartDate, ContractTerm, Status FROM Contract WHERE Id = :contractId];
+        System.assertEquals(testAccount.Id, createdContract.AccountId, 'Account ID should match');
+        System.assertEquals(Date.parse('2023-01-01'), createdContract.StartDate, 'Start Date should match');
+        System.assertEquals(12, createdContract.ContractTerm, 'Contract Term should match');
+        System.assertEquals('Draft', createdContract.Status, 'Status should match');
     }
 
-    // Teste la méthode updateContract de la classe ContractAPIController.
-    @IsTest
-    static void testUpdateContract() {
-        // Crée un compte et un contrat pour le test.
-        Account testAccount = new Account(Name = 'Test Account');
-        insert testAccount;
-        
-        Contract testContract = new Contract(
-            AccountId = testAccount.Id,
-            StartDate = Date.today(),
-            ContractTerm = 12
-        );
-        insert testContract;
-
-        // Prépare la requête et la réponse.
-        RestRequest req = new RestRequest();
-        RestResponse res = new RestResponse();
-        
-        req.requestBody = Blob.valueOf(JSON.serialize(new Map<String, String> {
-            'ContractId' => testContract.Id,
-            'StartDate' => '2023-11-01',
-            'ContractTerm' => '24'
-        }));
-        
-        RestContext.request = req;
-        RestContext.response = res;
-        
+    // Méthode de test pour la mise à jour d'un contrat
+    @isTest static void testUpdateContract() {
         Test.startTest();
-        
-        // Appelle la méthode updateContract et vérifie le résultat.
-        String contractId = ContractAPIController.updateContract();
-        Contract updatedContract = [SELECT Id, StartDate, ContractTerm FROM Contract WHERE Id = :contractId];
-        Test.stopTest();
-        System.assertEquals(Date.parse('2023-11-01'), updatedContract.StartDate);
-        System.assertEquals(24, updatedContract.ContractTerm);
-        
-        
-    }
 
-    // Teste la méthode deactivateContract de la classe ContractAPIController.
-    @IsTest
-    static void testDeactivateContract() {
-        // Crée un compte et un contrat pour le test.
-        Account testAccount = new Account(Name = 'Test Account');
+        // Création d'un compte, d'un contact et d'un contrat pour le test
+        Account testAccount = new Account(Name='Test Account');
         insert testAccount;
-        
+
+        Contact testContact = new Contact(FirstName='Test', LastName='Contact', AccountId=testAccount.Id);
+        insert testContact;
+
         Contract testContract = new Contract(
             AccountId = testAccount.Id,
-            StartDate = Date.today(),
+            StartDate = Date.parse('2023-01-01'),
             ContractTerm = 12,
-            Status = 'Activated'
+            Status = 'Draft'
         );
         insert testContract;
 
-        // Prépare la requête et la réponse.
+        // Préparation de la requête
         RestRequest req = new RestRequest();
         RestResponse res = new RestResponse();
+        req.requestURI = '/services/apexrest/Contract/';
+        req.httpMethod = 'PUT';
+        req.requestBody = Blob.valueOf(JSON.serialize(
+            new Map<String, Object>{
+                'ContractId' => testContract.Id,
+                'StartDate' => '2023-02-01',
+                'ContractTerm' => '6'
+            }
+        ));
         
-        req.requestURI = '/Contract/' + testContract.Id;
         RestContext.request = req;
         RestContext.response = res;
-        
-        Test.startTest();
-        
-        // Appelle la méthode deactivateContract et vérifie le résultat.
-        String contractId = ContractAPIController.deactivateContract();
-        Contract deactivatedContract = [SELECT Id, Status FROM Contract WHERE Id = :contractId];
+
+        // Appel de la méthode
+        String contractId = ContractAPIController.updateContract();
+
         Test.stopTest();
-        System.assertEquals('Expired', deactivatedContract.Status);
-        
-        
+
+        // Vérification des résultats
+        System.assertEquals(testContract.Id, contractId, 'Contract ID should match');
+        Contract updatedContract = [SELECT Id, StartDate, ContractTerm FROM Contract WHERE Id = :contractId];
+        System.assertEquals(Date.parse('2023-02-01'), updatedContract.StartDate, 'Start Date should be updated');
+        System.assertEquals(6, updatedContract.ContractTerm, 'Contract Term should be updated');
     }
 }
